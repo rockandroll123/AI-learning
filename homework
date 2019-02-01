@@ -1,0 +1,71 @@
+
+from __future__ import print_function
+import keras
+from keras.datasets import cifar10
+from keras.preprocessing.image import ImageDataGenerator
+from keras.models import Sequential
+from keras.layers import Dense, Dropout, Activation, Flatten
+from keras.layers import Conv2D, MaxPooling2D
+from keras import optimizers
+from keras.optimizers import RMSprop
+import os
+(x_train, y_train),(x_test, y_test) = cifar10.load_data()
+print('x_train shape: ', x_train.shape)
+print(x_train.shape[0], 'train samples')
+print(x_test.shape[0], 'test samples')
+epochs= 30
+batch_size = 512
+num_classess =10
+x_train = x_train.reshape(50000,3072)
+x_test  = x_test.reshape(10000,3072)
+x_train = x_train.astype('float32')
+x_test  = x_test.astype('float32')
+x_train = x_train/255
+x_test  = x_test/255
+print('x_train shape: ', x_train.shape)
+print(x_train.shape[0], 'train samples')
+print(x_test.shape[0], 'test samples')
+y_train= keras.utils.to_categorical(y_train, num_classess)
+y_test = keras.utils.to_categorical(y_test, num_classess)
+model= Sequential()
+model.add(Dense(512, activation='relu', input_shape=(32*32*3,)))
+model.add(Dropout(0.2))
+model.add(Dense(512, activation='relu'))
+model.add(Dropout(0.2))
+model.add(Dense(num_classess, activation='softmax'))
+model.summary()
+model.compile(loss='categorical_crossentropy',
+              optimizer=optimizers.RMSprop(lr=0.001),
+              metrics=['accuracy'])
+history= model.fit(x_train, y_train,
+                  batch_size= batch_size,
+                  epochs=epochs,
+                  verbose=1,
+                  validation_data=(x_test,y_test))
+score= model.evaluate(x_test, y_test, verbose=0)
+print( 'test loss:', score[0])
+print('test accuracy:', score[1])
+import matplotlib.pyplot as plt
+history_dict=history.history
+history_dict.keys()
+history_dict = history.history
+loss_values = history_dict['loss']
+val_loss_values = history_dict['val_loss']
+epochs = range(1, len(loss_values) + 1)
+plt.plot(epochs, loss_values, 'bo', label='Training loss')
+plt.plot(epochs, val_loss_values, 'b', label='Validation loss')
+plt.title('Training and validation loss')
+plt.xlabel('Epochs')
+plt.ylabel('Loss')
+plt.legend()
+plt.show()
+plt.clf()
+acc = history_dict['acc']
+val_acc = history_dict['val_acc']
+plt.plot(epochs, acc, 'bo', label='Training acc')
+plt.plot(epochs, val_acc, 'b', label='Validation acc')
+plt.title('Training and validation accuracy')
+plt.xlabel('Epochs')
+plt.ylabel('Accuracy')
+plt.legend()
+plt.show()
